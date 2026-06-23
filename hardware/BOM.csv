@@ -1,0 +1,8 @@
+Category,Part Number,Description,Quantity
+MCU,STM32G474RET6,Main Microcontroller Cortex-M4,1
+Profinet,netX 90,Hilscher Profinet Coprocessor,1
+ADC,ADS124S08IPBS,24-bit ADC for Thermocouples,1
+Isolation,ISO7741DWR,Quad-channel Digital Isolator,2
+Optocoupler,TLP281-4,Quad Optocoupler for SSR drive,2
+Connector,Type-C 16pin,USB Type-C Receptacle,1
+Connector,RJ45 Dual,Dual Port Industrial Ethernet,1
