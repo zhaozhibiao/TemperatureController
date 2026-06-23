@@ -1,0 +1,26 @@
+Pin Name,Signal Name,Function,Notes
+PA13,SWDIO,Debug,SWD Data
+PA14,SWCLK,Debug,SWD Clock
+PH0-OSC_IN,HSE_IN,Clock,8MHz Crystal Input
+PH1-OSC_OUT,HSE_OUT,Clock,8MHz Crystal Output
+PC14,LSE_IN,Clock,32.768kHz Input
+PC15,LSE_OUT,Clock,32.768kHz Output
+PA11,USB_DM,Comm,Type-C D- (via ESD)
+PA12,USB_DP,Comm,Type-C D+ (via ESD)
+PA4,SPI1_NSS,Profinet,CS for netX 90
+PA5,SPI1_SCK,Profinet,SCK for netX 90
+PA6,SPI1_MISO,Profinet,MISO for netX 90
+PA7,SPI1_MOSI,Profinet,MOSI for netX 90
+PB12,SPI2_NSS,Temp ADC,CS for ADS124S08 (via ISO7741)
+PB13,SPI2_SCK,Temp ADC,SCK for ADS124S08 (via ISO7741)
+PB14,SPI2_MISO,Temp ADC,MISO for ADS124S08 (via ISO7741)
+PB15,SPI2_MOSI,Temp ADC,MOSI for ADS124S08 (via ISO7741)
+PC4,ADC_DRDY,Temp ADC,Data Ready from ADS (via ISO7741)
+PC0,SSR_PWM_1,Control Out,PWM to TLP281 (CH1)
+PC1,SSR_PWM_2,Control Out,PWM to TLP281 (CH2)
+PC2,SSR_PWM_3,Control Out,PWM to TLP281 (CH3)
+PC3,SSR_PWM_4,Control Out,PWM to TLP281 (CH4)
+PC5,SSR_PWM_5,Control Out,PWM to TLP281 (CH5)
+NRST,RESET,System,Reset Circuit
+VDD,3.3V_DIG,Power,Decoupling Caps required
+VDDA,3.3V_ANA,Power,Filtered 3.3V for analog internal
