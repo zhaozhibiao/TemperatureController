@@ -8,3 +8,11 @@ Connector,Type-C 16pin,USB Type-C Receptacle,1
 Connector,RJ45 Dual,Dual Port Industrial Ethernet,1
 Power,LMR16020,60V 2A Step-Down Converter,1
 Power,SMCJ33A,33V TVS Diode,1
+Indicator,LED 0603 Red,SSR Output / Error Indicators,8
+Indicator,LED 0603 Green,Power / Link Indicators,4
+Indicator,LED 0603 Yellow,Activity Indicators,2
+Connector,KF128-5.08-2P,2-Pin Terminal Block (24V Power),1
+Connector,KF2EDGK-5.08-2P,2-Pin Pluggable Terminal (SSR Outputs),5
+Connector,KF2EDGK-5.08-2P,2-Pin Pluggable Terminal (Thermocouples),5
+Connector,FPC-0.5-20P,0.5mm Pitch FPC Connector (Board to Board),2
+Connector,Pin Header 2.54mm,1x10P Male/Female Header (Board to Board),2
