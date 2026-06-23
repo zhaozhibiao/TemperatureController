@@ -6,3 +6,5 @@ Isolation,ISO7741DWR,Quad-channel Digital Isolator,2
 Optocoupler,TLP281-4,Quad Optocoupler for SSR drive,2
 Connector,Type-C 16pin,USB Type-C Receptacle,1
 Connector,RJ45 Dual,Dual Port Industrial Ethernet,1
+Power,LMR16020,60V 2A Step-Down Converter,1
+Power,SMCJ33A,33V TVS Diode,1
