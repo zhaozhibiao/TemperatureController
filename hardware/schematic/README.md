@@ -1,35 +1,56 @@
-# Temperature Controller Hardware Design Guide
+# 温控仪硬件原理图与 PCB 设计实施指南
 
-This directory contains the schematic design resources for the Profinet Temperature Controller.
+这份文档详细规划了基于选定 BOM 的 5 通道 Profinet 温控仪原理图设计模块及实施步骤。
 
-## Directory Structure
-- `/schematic` - EDA schematic files (Altium/KiCad).
-- `/pcb` - EDA PCB layout files.
-- `/datasheets` - Save critical datasheets here (ADS124S08, netX 90, STM32G4).
-- `/exports` - Gerber files, Pick & Place data, and PDF schematics.
+## 1. 核心问题与设计约束
 
-## Key Design Constraints (Checklist)
+### 1.1 电源管理芯片选择 (XL1509 评估)
+**评估结果**：可以使用，但需要加强前级保护。
+* **分析**：XL1509 最大输入电压为 40V。但在重工业应用场景中，24V 工业供电母线上经常会出现浪涌，峰值可能会瞬间超过 40V，从而击穿芯片。
+* **解决方案**：在 24V 输入端必须放置大功率 TVS 瞬态抑制二极管（建议选 SMCJ33A），并串联自恢复保险丝（PPTC）。如果不受成本严格限制，建议升级为耐压 60V 的 DC-DC 芯片（例如 LMR16020 或 XL7015）。
 
-### 1. Power Supply & Grounding
-- [ ] **24V Input Protection**: Implement reverse polarity protection, over-voltage TVS (SMBJ30A), and a PPTC fuse.
-- [ ] **Isolated Analog Section**: The ADS124S08 and thermocouple terminals MUST reside on an isolated analog ground plane (`AGND_ISO`).
-- [ ] **Digital Isolation**: Use ISO7741 (or similar) to isolate the SPI bus and DRDY signal between the STM32 (`DGND`) and the ADS124S08 (`AGND_ISO`). Power the isolated side with a dedicated B0505S isolated DC-DC converter.
+### 1.2 标准 DIN 导轨外壳尺寸约束
+* **设计约束**：标准的 DIN 导轨外壳内部 PCB 的面积受到严格限制（通常单板尺寸在 100mm × 70mm 左右）。
+* **应对策略**：
+  - **双层堆叠设计**：建议将 PCB 分为两层：**底层板**（走强电、电源、继电器接口、网络接口）和 **顶层板**（主控 MCU、ADC 模拟采集、Type-C）。两板之间通过排针/排母连接。
+  - **4层板布线**：为了在紧凑空间内做好地线隔离和屏蔽，建议顶层板使用 4 层 PCB，内部留出完整的 GND 层和电源层。
 
-### 2. Thermocouple Acquisition (ADS124S08)
-- [ ] **Input Filtering**: Every K-type TC input pair must have differential and common-mode RC low-pass filters to reject industrial EMI.
-- [ ] **ESD Protection**: Use low-leakage ESD diodes on the TC inputs. Standard TVS diodes leak too much current and affect TC accuracy.
-- [ ] **CJC Sensor**: Place a PT100 or precision NTC thermistor near the center of the TC terminal blocks. Route to AIN10/AIN11 of the ADS124S08 for Cold Junction Compensation.
+---
 
-### 3. MCU & Profinet (STM32G4 + netX 90)
-- [ ] **Pin Mapping**: Refer to `STM32G474_Pinout.csv` for exact MCU pin assignments.
-- [ ] **High-Speed SPI**: Route the SPI bus between the STM32 and netX 90 keeping traces short. Add 22Ω or 33Ω series termination resistors on the SCK and MOSI/MISO lines to prevent ringing.
-- [ ] **Ethernet Magentics**: Maintain 100Ω differential impedance for the netX 90 TX/RX pairs. Use an RJ45 connector with integrated magnetics to save space.
+## 2. 硬件原理图模块划分
 
-### 4. Output Control
-- [ ] **SSR Drives**: The 5 output channels from the MCU must drive optocouplers (e.g., TLP281-4) to isolate the MCU from the external SSR load.
-- [ ] **LED Indicators**: Include LEDs on the primary side of the optocouplers for visual debugging of PWM outputs.
+在 EDA 软件中，建议按以下 6 个逻辑模块进行层次化或分页绘制：
 
-## Next Steps
-1. Create the Altium/KiCad project in this directory.
-2. Build the component library referencing the `../BOM.csv`.
-3. Draw the hierarchical schematics.
+### 2.1 电源管理模块
+* **输入保护**：24V DC 输入，加 SMCJ33A TVS 二极管。
+* **主降压 (24V -> 5V)**：XL1509（加前级保护）。
+* **MCU 供电 (5V -> 3.3V)**：使用高纹波抑制比的 LDO（如 AMS1117-3.3）。
+* **隔离供电 (5V -> ISO_5V)**：使用隔离型 DC-DC 电源模块（如 B0505S-1W）为 ADS124S08 和数字隔离器的热端供电。
+
+### 2.2 主控最小系统
+* **MCU**：STM32G474RET6。
+* **时钟**：8MHz 外部高频晶振 (HSE) 用于精确的 USB 时序；32.768kHz 外部低频晶振 (LSE) 用于 RTC。
+
+### 2.3 高精度隔离温度采集模块
+> **【警告】**：模拟地 (AGND) 与 数字地 (DGND) 必须在物理上完全隔离！
+* **输入滤波与保护**：每一路差分对都需要 RC 低通滤波以及低漏电流的 ESD 保护阵列。
+* **ADC模数转换**：使用 1 颗 TI ADS124S08 (24位)。
+* **冷端补偿 (CJC)**：在 5个热电偶端子的物理中心位置，放置一颗 PT100 或高精度 NTC。
+* **数字隔离**：STM32 到 ADC 的 SPI 总线必须经过 **ISO7741** 隔离芯片。
+
+### 2.4 继电器控制输出模块
+* **隔离驱动**：STM32 驱动 **TLP281-4** 线性光耦。
+* **状态指示**：在光耦的发光二极管侧串联一颗可见光 LED。
+
+### 2.5 工业以太网通讯模块 (Profinet)
+* **协处理器**：Hilscher netX 90。
+* **以太网口**：双 RJ45 接口，建议选用内部集成网络变压器的 RJ45 插座。
+
+### 2.6 本地配置接口 (Type-C)
+* **配置引脚**：CC1 和 CC2 必须分别通过 5.1kΩ 电阻独立接地。
+* **数据线防护**：D+ 和 D- 必须加上专用 USB ESD 保护芯片（如 USBLC6-2SC6）。
+
+## 下一步
+1. 建立工程，导入 `STM32G474_Pinout.csv` 的引脚映射。
+2. 完成原理图绘制并执行 DRC 检查。
+3. 按照约束进行叠板和布局设计。
